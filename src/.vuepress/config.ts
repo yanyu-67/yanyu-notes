@@ -3,7 +3,7 @@ import { defineUserConfig } from "vuepress";
 import theme from "./theme.js";
 
 export default defineUserConfig({
-  // 部署到域名根路径；若部署到子路径，需同步调整此项。
+  // 部署到域名子路径
   base: "/yanyu-notes/",
 
   // 站点语言和浏览器标题。
