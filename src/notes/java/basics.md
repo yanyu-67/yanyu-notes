@@ -45,3 +45,22 @@ public class PassByValue {
 **结论**：重载是同名方法的参数列表不同，主要在编译期选择；重写是子类提供父类实例方法的实现，运行时根据实际对象进行动态分派。
 
 **易错点**：仅改变返回类型不能构成重载。静态方法属于隐藏，不属于实例方法的多态重写。
+
+## final 关键字与不可变性
+
+**结论**：`final` 修饰类表示该类不可被继承；`String` 和 `StringBuffer` 均为 final 类，`HashMap` 和 `Hashtable` 则不是。
+
+**原因**：
+- `final class` 禁止派生，旨在保护类的核心行为不被篡改，多见于不可变类或线程安全类。
+- `String` 的 final 设计保障了不可变性，使字符串常量池、哈希码缓存和类加载安全成为可能。
+- `StringBuffer` 的 final 设计防止子类覆盖其同步方法，确保线程安全语义不被破坏。
+
+**典型 final 类**：
+- `String`、`StringBuilder`、`StringBuffer`
+- 基本类型包装类：`Integer`、`Long`、`Double` 等
+- 枚举类型（`enum`）隐式为 final
+
+**易错点**：
+- final 类 ≠ 不可变对象：`StringBuffer` 是 final 类但其对象内容可变（通过 `append` 等方法）；`String` 则是 final + 不可变。
+- 线程安全类不一定是 final 类（如 `Hashtable`、`Vector`），final 类也不一定线程安全（`Integer` 虽不可变但无同步需求）。
+- 判断 final 类应以源码声明为准，不能凭“常见用法”或“是否线程安全”推断。
