@@ -134,3 +134,46 @@ public class ReadNote {
 - 不要在 `finally` 块中使用 `return`，这是常见陷阱。
 - 异常链丢失会导致排查问题困难，务必在抛出新异常时传入原异常。
 - 避免捕获异常后什么都不做（空 `catch` 块），至少记录日志。
+
+## Socket 编程服务端与客户端操作
+
+**结论**：`getInputStream()` 是 `Socket` 类的通用方法，在服务端和客户端均可使用，不属于服务端专用操作。服务端核心操作包括 `bind()`、`accept()`、`close()`；客户端核心操作包括 `connect()`、`getInputStream()`、`getOutputStream()`、`close()`。
+
+**服务端（ServerSocket）典型操作**：
+- `bind(SocketAddress endpoint)`：绑定端口和地址。
+- `accept()`：阻塞等待客户端连接，返回 `Socket` 对象。
+- `close()`：关闭 `ServerSocket`，释放端口资源。
+
+**客户端（Socket）典型操作**：
+- `connect(SocketAddress endpoint)`：连接指定服务端（构造时可指定）。
+- `getInputStream()`：获取输入流，读取服务端发送的数据。
+- `getOutputStream()`：获取输出流，向服务端发送数据。
+- `close()`：关闭连接。
+
+**服务端与客户端共享操作**：
+- `getInputStream()` / `getOutputStream()`：连接建立后，双方均通过 `Socket` 获取流进行数据交换。
+- `close()`：双方均可主动关闭连接。
+
+**服务端完整流程示例**：
+```java
+// 服务端
+ServerSocket server = new ServerSocket(8080);   // 绑定
+while (true) {
+    Socket socket = server.accept();            // 接受连接
+    InputStream in = socket.getInputStream();   // 读取数据
+    OutputStream out = socket.getOutputStream(); // 发送数据
+    socket.close();                             // 关闭
+}
+```
+```java
+// 客户端
+Socket socket = new Socket("localhost", 8080);  // 连接
+OutputStream out = socket.getOutputStream();    // 发送数据
+InputStream in = socket.getInputStream();       // 读取响应
+socket.close();                                 // 关闭
+```
+
+**易错点**：
+- `accept()` 只存在于 `ServerSocket`，是服务端独有操作。
+- `getInputStream()` 和 `getOutputStream()` 存在于 `Socket`，服务端和客户端均可用。
+- `bind()` 是 `ServerSocket` 的常用操作，但 `Socket` 也提供 `bind()` 方法（较少使用），本题语境下关注的是服务端的典型操作。

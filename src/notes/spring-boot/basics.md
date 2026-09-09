@@ -34,3 +34,33 @@ order: 1
 ## 实践：查看条件报告
 
 对已经打包好的 Spring Boot 应用，可以运行 `java -jar app.jar --debug` 查看自动配置条件信息，实际 JAR 名称按项目替换。记录 Spring Boot 版本、依赖、匹配条件和未匹配原因，日志中不要保留密钥。
+
+## Spring 核心特性与常见误区
+
+**结论**：Spring 提供 IoC/DI、AOP 基础设施、声明式事务管理等核心能力，但**不内置日志系统**。日志功能需集成第三方日志框架（如 Log4j、SLF4J、Logback），并通过 Spring AOP 或直接调用的方式实现日志记录。
+
+**Spring 核心特性**：
+- **依赖注入（DI）**：通过 IoC 容器管理对象创建和依赖关系，降低耦合度。
+- **AOP（面向切面编程）**：提供切面、通知、切点等基础设施，用于横切关注点（事务、日志、安全、性能监控等）。
+- **声明式事务管理**：通过 `@Transactional` 或 XML 配置管理事务边界，无需手动编码。
+- **Spring MVC**：Web 层框架，简化 RESTful API 和 Web 应用开发。
+- **数据访问抽象**：统一的数据访问异常体系，简化 JDBC、ORM 集成。
+
+**常见误区**：
+- Spring 提供 AOP 机制，但**不提供内置日志实现**。日志记录是应用层的 AOP 实践，需配合日志框架使用。
+- Spring Boot 默认使用 Logback 作为日志实现，但这属于 Spring Boot 的自动配置，而非 Spring 框架本身的能力。
+- Spring 本身不包含日志功能，`commons-logging` 是门面（接口），具体实现由 `log4j`、`logback` 等提供。
+
+**AOP 日志示例**（需依赖 SLF4J/Logback）：
+```java
+@Aspect
+@Component
+public class LoggingAspect {
+    private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
+
+    @Before("execution(* com.example.service.*.*(..))")
+    public void logMethodCall(JoinPoint jp) {
+        log.info("调用方法: " + jp.getSignature().getName());
+    }
+}
+```
