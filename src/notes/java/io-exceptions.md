@@ -43,3 +43,94 @@ public class ReadNote {
 **实践前提**：在运行目录准备 UTF-8 编码的 `note.txt`。如果文件不存在会抛出异常，而不是自动创建文件。
 
 **易错点**：不要在 `finally` 中随意 `return`，它可能覆盖原有返回值或异常。
+
+
+## Integer.parseInt 与 NumberFormatException
+
+**结论**：`Integer.parseInt(String s)` 要求字符串必须为合法整数格式，否则抛出 `NumberFormatException`。
+
+**合法格式规则**：
+- 允许包含数字 `0` ~ `9`；
+- 允许前导正负号 `+` 或 `-`；
+- 不允许包含字母、小数点、空格、下划线等其他字符；
+- 数值必须在 `int` 范围内（-2^31 ~ 2^31-1）。
+
+**常见抛出场景**：
+- 字符串包含非数字字符，如 `"123a"`、`"12.3"`；
+- 字符串为空或仅有空格，如 `""`、`" "`；
+- 数值溢出，如 `"2147483648"`（超过 `Integer.MAX_VALUE`）。
+
+**易错点**：
+- `NumberFormatException` 是 `IllegalArgumentException` 的子类，在方法参数不合法时抛出。
+- 传入 `null` 会抛出 `NullPointerException`，而非 `NumberFormatException`——两者需区分。
+- 诊断异常时优先选最具体的子类，而非泛化的父类（如 `RuntimeException`）。
+
+## finally、throw、throws 与 final 辨析
+
+**结论**：`finally` 保证代码执行；`throws` 声明方法可能抛出的检查型异常；`throw` 主动抛出异常对象；`final` 与异常无关，用于限制类、方法或变量。
+
+**各关键字定义**：
+- **finally**：`try-catch-finally` 结构中的可选块，无论是否捕获异常（或异常未被捕获）均会执行，常用于释放资源（关闭流、连接等）。若 `System.exit()` 或 JVM 崩溃则不执行。
+- **throws**：写在方法签名尾部，声明该方法可能抛出一种或多种检查型异常（非运行时异常）。调用方必须处理或继续向上声明。
+- **throw**：方法体内语句，后跟异常对象实例，用于主动触发异常（检查型或非检查型均可）。
+- **final**：关键字，修饰类时类不可被继承；修饰方法时方法不可被子类重写；修饰变量时变量引用不可变（基本类型值不变，引用类型不可指向新对象，但对象内容可变）。
+
+**易错点**：
+- `throws` 声明异常时，方法内部不一定会抛出该异常，仅作声明；`throw` 则是确定抛出。
+- 不要把 `final` 与 `finally` 或 `finalize()` 混淆——三者功能完全不同，`finalize()` 是 `Object` 的废弃方法，用于对象回收前回调，不推荐使用。
+- `finally` 块中若抛出异常或执行 `return`，会覆盖 `try/catch` 中的异常或返回值，应避免此类写法。
+
+## 字节流与字符流的区分
+
+**结论**：字节流继承自 `InputStream`/`OutputStream`，处理原始字节；字符流继承自 `Reader`/`Writer`，处理字符（Unicode）。`InputStreamReader` 是转换流，属于字符流；`PrintStream` 和 `FileInputStream` 为字节流。
+
+**典型字节流类**：
+- `FileInputStream`、`FileOutputStream`：文件字节读写。
+- `BufferedInputStream`、`BufferedOutputStream`：带缓冲的字节流。
+- `PrintStream`：字节输出流，提供 `print`/`println` 方法，`System.out` 是其典型实例。
+- `ObjectInputStream`、`ObjectOutputStream`：对象序列化字节流。
+
+**典型字符流类**：
+- `FileReader`、`FileWriter`：文件字符读写（便捷类，底层实为 `InputStreamReader`/`OutputStreamWriter`）。
+- `BufferedReader`、`BufferedWriter`：带缓冲的字符流，`BufferedReader.readLine()` 常用。
+- `CharArrayReader`、`CharArrayWriter`：操作 `char[]` 的字符流。
+- `InputStreamReader`、`OutputStreamWriter`：字节与字符间的转换桥梁，属于字符流。
+
+**易错点**：
+- 判断依据不是“是否读写文件”或“是否包含 Stream 字样”，而是**继承体系**：`InputStream`/`OutputStream` 子类为字节流，`Reader`/`Writer` 子类为字符流。
+- `PrintStream` 虽提供字符友好的打印方法，但其继承自 `FilterOutputStream`，本质是字节流，注意与 `PrintWriter`（字符流）区分。
+- `System.out` 是 `PrintStream`（字节流），`System.in` 是 `InputStream`（字节流），`System.err` 也是 `PrintStream`（字节流）。
+
+## 异常处理最佳实践
+
+**结论**：异常处理应遵循以下原则：自定义业务异常优先继承 `RuntimeException`；异常转换时需保留原始异常链；`finally` 块中避免使用 `return`；异常仅用于异常情况，不作为流程控制。
+
+**最佳实践详解**：
+
+1. **自定义异常优先继承 `RuntimeException`**
+   - 现代框架（如 Spring）更倾向非受检异常，减少代码侵入性，调用方无需强制处理。
+   - 若需调用方强制处理，仍可选择继承 `Exception`（受检异常）。
+
+2. **异常链保留**
+   - 捕获异常后抛出新异常时，务必传入原始异常作为 `cause`：
+     ```java
+     try {
+         // 业务操作
+     } catch (IOException e) {
+         throw new BusinessException("业务处理失败", e);
+     }
+     ```
+   - 保留堆栈链便于快速定位根因。
+
+3. **`finally` 中避免 `return`**
+   - `finally` 中的 `return` 会覆盖 `try`/`catch` 中的返回值，甚至抑制异常传播（异常被“吞掉”）。
+   - 若 `finally` 中必须执行清理逻辑，不应包含 `return`。
+
+4. **异常不是流程控制**
+   - 异常创建需要收集堆栈信息，性能开销大。
+   - 用异常做条件分支使代码难以理解和维护，应使用 `if-else` 等正常控制结构。
+
+**易错点**：
+- 不要在 `finally` 块中使用 `return`，这是常见陷阱。
+- 异常链丢失会导致排查问题困难，务必在抛出新异常时传入原异常。
+- 避免捕获异常后什么都不做（空 `catch` 块），至少记录日志。

@@ -33,3 +33,70 @@ java -XshowSettings:vm -version
 ```
 
 记录 JDK 版本、虚拟机实现和内存设置后再比较运行结果。不同收集器、堆大小和 JDK 版本下的结果可能不同，不能把一次观察当作 JVM 规范。
+
+## 引用类型：软引用与弱引用
+
+**结论**：软引用（SoftReference）在内存不足时回收，弱引用（WeakReference）在每次 GC 时都可能回收。二者回收时机不同，均可通过 `get()` 获取对象（可能为 null）。
+
+**回收时机对比**：
+
+| 引用类型 | 回收时机 | 典型用途 |
+|---------|---------|---------|
+| 软引用（SoftReference） | JVM 内存不足时（OOM 前） | 内存敏感缓存（图片、结果集） |
+| 弱引用（WeakReference） | 下一次 GC 运行时（无论内存） | WeakHashMap、ThreadLocal 键 |
+
+**使用方式**：
+- 创建：`SoftReference<Object> ref = new SoftReference<>(obj);` / `WeakReference<Object> ref = new WeakReference<>(obj);`
+- 获取：`ref.get()` 返回引用对象，若已被回收则返回 `null`。
+
+**其他引用类型**：
+- **强引用**：最常见的 `new` 创建，永不回收（只要可达）。
+- **虚引用（PhantomReference）**：无法通过 `get()` 获取对象，仅用于跟踪对象回收（多用于 NIO 堆外内存清理）。
+
+**易错点**：
+- 弱引用“可能被回收”意味着不保证每次 GC 都回收，但 JVM 实现通常会在每次 GC 时清理弱引用。
+- 软引用对象回收前可通过引用队列（ReferenceQueue）进行回调处理，但普通使用只需关注 `get()` 返回值是否为 null。
+
+## JVM 堆内存参数与分代比例计算
+
+**结论**：`-Xms` 指定 JVM 初始堆内存（最小堆），`-Xmx` 指定最大堆，`-Xmn` 指定新生代大小，`-XX:SurvivorRatio=N` 表示 Eden:单个 Survivor = N:1，两个 Survivor 区合计占比为 2/(N+2)。
+
+**关键参数**：
+- `-Xms<size>`：堆内存初始值（最小堆），JVM 启动时分配。
+- `-Xmx<size>`：堆内存最大值，JVM 运行时最多可扩展至此。
+- `-Xmn<size>`：新生代（Young Generation）大小，包含 Eden + 两个 Survivor。
+- `-XX:SurvivorRatio=<N>`：Eden 与单个 Survivor 的大小比例，默认为 8（即 Eden:S0:S1 = 8:1:1）。
+
+**计算示例**（SurvivorRatio=3）：
+- 新生代比例 = Eden : S0 : S1 = 3 : 1 : 1，总份数 = 3+1+1=5。
+- 单个 Survivor 大小 = 新生代 / 5。
+- 两个 Survivor 合计 = 新生代 × 2/5。
+
+**易错点**：
+- SurvivorRatio 指定的是 Eden:单个 Survivor 的比例，两个 Survivor 区通常大小相等，合计占比需乘以 2。
+- 不要混淆 `-Xms`（最小堆）和 `-Xmn`（新生代大小）的含义。
+- 若 `-Xms` 与 `-Xmx` 不相等，JVM 堆可在二者之间动态伸缩；相等时可避免扩容开销，适用于对响应时间敏感的场景。
+
+## String 对象创建与字符串常量池
+
+**结论**：`String s = new String("xyz")` 在堆上必定创建一个新 `String` 对象；字符串常量池中的 `"xyz"` 是否新增取决于该字面量是否首次出现，因此总创建数为 1 或 2，不可能固定为 2。
+
+**创建数判断规则**：
+- **堆上对象**：`new` 操作必定在堆中新建一个 `String` 对象，无论常量池状态如何。
+- **常量池对象**：字符串字面量 `"xyz"` 在类加载时检查常量池：
+  - 若常量池中尚无内容相同的字符串 → 在常量池中创建对应对象，总对象数为 2（池中 1 个 + 堆上 1 个）。
+  - 若常量池中已存在内容相同的字符串 → 复用已有对象，总对象数为 1（仅堆上 1 个）。
+
+**示例**：
+```java
+// 首次出现 "xyz"（常量池创建 + 堆上 new）
+String s1 = new String("xyz");  // 2 个对象
+
+// 再次出现 "xyz"（常量池复用 + 堆上 new）
+String s2 = new String("xyz");  // 1 个对象（仅堆上新建）
+```
+
+**易错点**：
+- 不能简单认为“字面量 + new”总是创建两个对象，需要判断常量池中是否已存在。
+- `String.intern()` 方法可主动将堆中的字符串加入常量池，但本题不涉及。
+- Java 7+ 将字符串常量池从方法区移至堆中，但创建行为逻辑不变。
