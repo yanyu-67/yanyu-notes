@@ -30,7 +30,7 @@
     </script>
     <title>HTTP 与接口测试 | 言羽的知识库</title><meta name="description" content="请求方法、幂等性、状态码与接口断言。">
     <link rel="preload" href="/yanyu-notes/assets/style-_6IJbYGh.css" as="style"><link rel="stylesheet" href="/yanyu-notes/assets/style-_6IJbYGh.css">
-    <link rel="modulepreload" href="/yanyu-notes/assets/app-H503h9vE.js"><link rel="modulepreload" href="/yanyu-notes/assets/api-testing-BEndauu_.js"><link rel="modulepreload" href="/yanyu-notes/assets/plugin-vue_export-helper-BDNMzG2s.js">
+    <link rel="modulepreload" href="/yanyu-notes/assets/app-CK7axv4p.js"><link rel="modulepreload" href="/yanyu-notes/assets/api-testing-Cx-hmzzx.js"><link rel="modulepreload" href="/yanyu-notes/assets/plugin-vue_export-helper-BDNMzG2s.js">
     
   </head>
   <body>
@@ -41,6 +41,6 @@
 <span class="line"><span style="--shiki-light:#E45649;--shiki-dark:#E06C75;">    http_reqs</span><span style="--shiki-light:#0184BC;--shiki-dark:#ABB2BF;">:</span><span style="--shiki-light:#383A42;--shiki-dark:#ABB2BF;"> [</span><span style="--shiki-light:#50A14F;--shiki-dark:#98C379;">&#39;count&gt;1000&#39;</span><span style="--shiki-light:#383A42;--shiki-dark:#ABB2BF;">]            </span><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">// 总请求数 &gt; 1000</span></span>
 <span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#ABB2BF;">  }</span></span>
 <span class="line"><span style="--shiki-light:#383A42;--shiki-dark:#ABB2BF;">};</span></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p><strong>易错点</strong>：</p><ul><li><code>http_req_failed</code> 的“失败”默认基于 HTTP 状态码 ≥ 400，不包含网络超时或连接错误（这些也会计入失败，但判定方式不同）。</li><li><code>http_req_duration</code> 包括发送、等待和接收的总时间，衡量端到端的响应速度。</li><li>Rate 类型指标在 k6 中输出为比例（0~1），Threshold 中设置 <code>rate&lt;0.01</code> 表示 1% 的失败率阈值。</li></ul></div><!----><!----><!----></div><footer class="vp-page-meta"><!----><div class="vp-meta-item git-info"><!----><!----></div></footer><nav class="vp-page-nav"><a class="route-link auto-link prev" href="/yanyu-notes/notes/testing/test-design.html" aria-label="测试用例设计"><div class="hint"><span class="arrow start"></span>上一页</div><div class="link"><!---->测试用例设计</div></a><a class="route-link auto-link next" href="/yanyu-notes/notes/testing/automation.html" aria-label="自动化测试基础"><div class="hint">下一页<span class="arrow end"></span></div><div class="link">自动化测试基础<!----></div></a></nav><!----><!----><!--]--></main><!--]--><footer class="vp-footer-wrapper" vp-footer><div class="vp-footer">言羽的知识库 · 编程学习、工具笔记与个人作品</div><div class="vp-copyright">Copyright © 2026 言羽</div></footer></div><!--]--><!--]--><!--[--><!----><!--[--><!--]--><!--]--><!--]--></div>
-    <script type="module" src="/yanyu-notes/assets/app-H503h9vE.js" defer></script>
+    <script type="module" src="/yanyu-notes/assets/app-CK7axv4p.js" defer></script>
   </body>
 </html>

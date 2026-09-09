@@ -30,7 +30,7 @@
     </script>
     <title>JVM 与内存管理 | 言羽的知识库</title><meta name="description" content="运行时内存、类初始化与垃圾回收的基础区别。">
     <link rel="preload" href="/yanyu-notes/assets/style-_6IJbYGh.css" as="style"><link rel="stylesheet" href="/yanyu-notes/assets/style-_6IJbYGh.css">
-    <link rel="modulepreload" href="/yanyu-notes/assets/app-H503h9vE.js"><link rel="modulepreload" href="/yanyu-notes/assets/jvm-B-5Bqpln.js"><link rel="modulepreload" href="/yanyu-notes/assets/plugin-vue_export-helper-BDNMzG2s.js">
+    <link rel="modulepreload" href="/yanyu-notes/assets/app-CK7axv4p.js"><link rel="modulepreload" href="/yanyu-notes/assets/jvm-CSGSLtbx.js"><link rel="modulepreload" href="/yanyu-notes/assets/plugin-vue_export-helper-BDNMzG2s.js">
     
   </head>
   <body>
@@ -40,6 +40,6 @@
 <span class="line"></span>
 <span class="line"><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">// 再次出现 &quot;xyz&quot;（常量池复用 + 堆上 new）</span></span>
 <span class="line"><span style="--shiki-light:#C18401;--shiki-dark:#E5C07B;">String</span><span style="--shiki-light:#E45649;--shiki-dark:#E06C75;"> s2 </span><span style="--shiki-light:#383A42;--shiki-dark:#56B6C2;">=</span><span style="--shiki-light:#A626A4;--shiki-dark:#C678DD;"> new</span><span style="--shiki-light:#4078F2;--shiki-dark:#61AFEF;"> String</span><span style="--shiki-light:#383A42;--shiki-dark:#E06C75;">(</span><span style="--shiki-light:#50A14F;--shiki-dark:#98C379;">&quot;xyz&quot;</span><span style="--shiki-light:#383A42;--shiki-dark:#E06C75;">)</span><span style="--shiki-light:#383A42;--shiki-dark:#ABB2BF;">;</span><span style="--shiki-light:#A0A1A7;--shiki-light-font-style:italic;--shiki-dark:#7F848E;--shiki-dark-font-style:italic;">  // 1 个对象（仅堆上新建）</span></span></code></pre><div class="line-numbers" aria-hidden="true" style="counter-reset:line-number 0;"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p><strong>易错点</strong>：</p><ul><li>不能简单认为“字面量 + new”总是创建两个对象，需要判断常量池中是否已存在。</li><li><code>String.intern()</code> 方法可主动将堆中的字符串加入常量池，但本题不涉及。</li><li>Java 7+ 将字符串常量池从方法区移至堆中，但创建行为逻辑不变。</li></ul></div><!----><!----><!----></div><footer class="vp-page-meta"><!----><div class="vp-meta-item git-info"><!----><!----></div></footer><nav class="vp-page-nav"><a class="route-link auto-link prev" href="/yanyu-notes/notes/java/concurrency.html" aria-label="线程与并发"><div class="hint"><span class="arrow start"></span>上一页</div><div class="link"><!---->线程与并发</div></a><a class="route-link auto-link next" href="/yanyu-notes/notes/java/io-exceptions.html" aria-label="IO 与异常处理"><div class="hint">下一页<span class="arrow end"></span></div><div class="link">IO 与异常处理<!----></div></a></nav><!----><!----><!--]--></main><!--]--><footer class="vp-footer-wrapper" vp-footer><div class="vp-footer">言羽的知识库 · 编程学习、工具笔记与个人作品</div><div class="vp-copyright">Copyright © 2026 言羽</div></footer></div><!--]--><!--]--><!--[--><!----><!--[--><!--]--><!--]--><!--]--></div>
-    <script type="module" src="/yanyu-notes/assets/app-H503h9vE.js" defer></script>
+    <script type="module" src="/yanyu-notes/assets/app-CK7axv4p.js" defer></script>
   </body>
 </html>
