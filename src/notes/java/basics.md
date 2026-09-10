@@ -376,3 +376,121 @@ non-sealed class Triangle extends Shape {}    // 开放继承
 ```
 
 **版本说明**：sealed classes 是 Java 17 正式特性（JEP 409），需 Java 17+ 支持。
+
+## final、finally 与 finalize 的区别
+
+**结论**：`final` 是修饰符，用于限制继承、重写和变量赋值；`finally` 是异常处理的代码块，保证代码始终执行；`finalize()` 是 `Object` 类的方法，用于对象被 GC 回收前的清理（已废弃）。三者拼写相似但用途完全不同。
+
+**各关键字详解**：
+
+| 关键字 | 类型 | 作用 | 典型用途 |
+|--------|------|------|----------|
+| `final` | 修饰符 | 类：不可继承；方法：不可重写；变量：不可重新赋值 | 定义常量、不可变类、锁定方法实现 |
+| `finally` | 异常处理块 | 无论是否发生异常都会执行的代码块 | 释放资源（关闭文件、数据库连接） |
+| `finalize()` | `Object` 方法 | GC 回收对象前调用 | 已废弃，不推荐使用 |
+
+**重点区分**：
+- **final 方法不能被子类覆盖（重写）** ，这是其基本特性，防止子类改变行为。
+- **final 类不能被继承**，如 `String`、`Integer`、`StringBuffer` 等。
+- **finally 块** 在 `try-catch-finally` 结构中，即使 `try` 或 `catch` 中有 `return`，`finally` 仍会执行（除非 JVM 退出）。
+- **finalize()** 是 `Object` 类的方法，在对象被 GC 回收前调用，用于清理资源，但**不保证执行时机**，且已被废弃。
+
+**版本说明**：
+- `finalize()` 在 Java 9 标记为 `@Deprecated`，Java 18 标记为 `@Deprecated(forRemoval = true)`，建议使用 `try-with-resources` 或 `java.lang.ref.Cleaner` 替代。
+- `final` 和 `finally` 自 Java 1.0 起行为稳定。
+
+**易错点**：
+- 不要把 `final`、`finally`、`finalize` 混淆——三者在语法和用途上完全无关。
+- `final` 修饰引用变量时，引用不可变，但对象内容可变（如 `final List<String> list = new ArrayList<>();` 可添加元素）。
+- `finally` 中若包含 `return`，会覆盖 `try` 中的返回值，应避免此写法。
+
+## Java GUI 编程包：java.awt 与 javax.swing
+
+**结论**：Java 基本 GUI 设计使用 `java.awt` 包（抽象窗口工具包），提供最基础的 GUI 组件。实际开发中更常用 `javax.swing`，它是对 AWT 的改进和扩展，提供更丰富的组件。
+
+**常用 Java 包分类**：
+
+| 包 | 用途 |
+|----|------|
+| `java.awt` | 基础 GUI 组件（AWT） |
+| `javax.swing` | 高级 GUI 组件（Swing，AWT 的扩展） |
+| `java.io` | 输入输出流、文件操作 |
+| `java.sql` | 数据库编程（JDBC） |
+| `java.rmi` | 远程方法调用 |
+| `java.net` | 网络编程 |
+| `java.util` | 集合框架、工具类 |
+
+**AWT 与 Swing 对比**：
+
+| 特性 | AWT (`java.awt`) | Swing (`javax.swing`) |
+|------|------------------|----------------------|
+| 组件类型 | 重量级（依赖本地 OS） | 轻量级（纯 Java 实现） |
+| 跨平台外观 | 随平台变化 | 统一外观（可换 Look and Feel） |
+| 组件丰富度 | 基础（Button、Label、TextField） | 丰富（JTable、JTree、JTabbedPane） |
+| 关系 | 基础 | AWT 的扩展和改进 |
+
+**易错点**：
+- 题目问“基本的 GUI 设计包”，答案是 `java.awt`，不是 `javax.swing`（虽然后者更常用）。
+- `java.awt` 和 `javax.swing` 经常配合使用（Swing 组件建立在 AWT 基础上）。
+- JavaFX（`javafx.*`）是现代 Java 桌面开发的选择，但需单独引入，不是 Java SE 标准库的默认组成部分（Java 11 起从 JDK 中分离）。
+
+## 抽象类与抽象方法语法
+
+**结论**：抽象类中可以定义抽象方法，语法为 `abstract 返回值类型 方法名(参数列表);`，无方法体且以分号结尾。类体中不能直接写执行语句，方法重载不能仅靠返回值类型区分。
+
+**抽象方法语法规则**：
+- 使用 `abstract` 修饰，无方法体，以 `;` 结束。
+- 只能定义在抽象类或接口中。
+- 抽象类可以同时包含抽象方法和具体方法。
+- 抽象方法可以重载（参数列表不同即可）。
+
+**常见编译错误**：
+
+| 错误写法 | 原因 |
+|---------|------|
+| `public abstract void anotherMethod() {}` | 抽象方法不能有方法体 |
+| `constInt = constInt + 5;`（类体中） | 类体不能直接包含执行语句 |
+| `public int method();`（已有 `void method()`） | 仅返回值不同不构成重载 |
+
+**类体的合法成员**：
+- 字段声明
+- 方法声明（抽象方法或具体方法）
+- 构造器
+- 初始化块（实例初始化块、静态初始化块）
+- 内部类、接口、枚举
+
+**易错点**：
+- 抽象方法不能有 `{}`，否则编译失败。
+- 类体中任何赋值、调用等执行语句必须放在方法体、构造器或初始化块内。
+- 方法签名由方法名和参数列表决定，返回值类型不参与重载判定。
+
+## 修饰符冲突与非法声明
+
+**结论**：`abstract` 与 `final` 不能同时修饰类或方法；抽象方法不能有方法体；`final` 方法可以有方法体但不能被重写。违反这些规则的类或方法声明会编译报错。
+
+**常见非法组合**：
+
+| 组合 | 是否合法 | 原因 |
+|------|---------|------|
+| `abstract final class` | ❌ | 抽象类需被继承，final 禁止继承，语义矛盾 |
+| `abstract final void method()` | ❌ | 抽象方法需被子类重写，final 禁止重写 |
+| `abstract void method() { }` | ❌ | 抽象方法不能有方法体 |
+| `abstract static void method()` | ❌ | 静态方法不能被重写，与抽象方法要求矛盾 |
+| `abstract private void method()` | ❌ | private 方法不可被继承/重写 |
+
+**合法示例**：
+```java
+public abstract class Test {
+    abstract void method();        // 抽象方法：无方法体，以分号结尾
+}
+
+public class Test2 {
+    final void method() { }        // final 方法：可有方法体，不可被重写
+}
+```
+
+**易错点**：
+- `abstract` 与 `final` 不能同时出现（修饰类或方法均不行）。
+- 抽象方法不能有 `{}` 方法体，即使为空。
+- `final` 方法可以有实现（方法体），只是不能在子类中被重写。
+- `abstract` 与 `private`、`static`、`final` 组合在方法上均非法。
