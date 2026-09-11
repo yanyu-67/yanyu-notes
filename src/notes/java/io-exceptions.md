@@ -177,3 +177,22 @@ socket.close();                                 // 关闭
 - `accept()` 只存在于 `ServerSocket`，是服务端独有操作。
 - `getInputStream()` 和 `getOutputStream()` 存在于 `Socket`，服务端和客户端均可用。
 - `bind()` 是 `ServerSocket` 的常用操作，但 `Socket` 也提供 `bind()` 方法（较少使用），本题语境下关注的是服务端的典型操作。
+
+
+## 文本文件、二进制文件与 File 类
+
+**结论**：Java 中所有文件底层都是字节序列，文本文件和二进制文件都可以当作二进制（用字节流）处理。文本与二进制的区别在内容编码方式，不在后缀名。
+
+**要点**：
+
+- 后缀名不能决定文件类型：`.java`、`.xml` 是文本文件，`.txt` 也可能存二进制数据。文本文件指内容按某种字符编码存储、可被文本编辑器正常解读的文件。
+- File 类只表示文件或目录的路径名，用于获取属性、创建、删除、重命名等，不负责读写。读写必须使用 IO 流类。
+- 字节流（FileInputStream / FileOutputStream）可处理所有类型文件；字符流在字节流之上按字符编码转换，只适合文本。
+
+**文件末尾的判断**：
+
+- 字节流 `read()` 返回 -1 表示到达末尾。
+- `BufferedReader.readLine()` 返回 null 表示到达末尾。
+- 以上都不抛 EOFException。EOFException 主要出现在 DataInputStream 等按数据类型读取、但数据提前结束的场景。
+
+**易错点**：认为 File 类能读写文件；认为后缀名决定文本或二进制；认为读到末尾必然抛 EOFException。

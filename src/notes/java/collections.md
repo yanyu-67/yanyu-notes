@@ -93,3 +93,21 @@ public class ListCapacity {
 - 树化条件是**两个条件同时满足**（链表长度 ≥ 8 且表容量 ≥ 64），而非仅看链表长度。
 - 红黑树不是 AVL 树——两者都是自平衡二叉搜索树，但红黑树平衡条件更宽松。
 - 平均 O(1) 是哈希冲突较少时的预期表现；极端情况下（所有 key 哈希值相同）会退化到 O(log n)（树化后）。
+
+## 集合类的线程安全性
+
+**结论**：Vector、StringBuffer、Properties（继承 Hashtable）是线程安全的；ArrayList、HashMap、StringBuilder 不是线程安全的。
+
+**原因**：
+
+- Vector、Hashtable、StringBuffer 属于早期集合类，关键方法用 synchronized 修饰，因此线程安全，但单线程下性能低于 ArrayList、HashMap、StringBuilder。
+- ArrayList、HashMap、StringBuilder 不做同步，多线程并发修改可能导致数据不一致、并发修改异常或结构损坏。
+- Properties 继承自 Hashtable，所以沿用了同步方法，属于线程安全的 Map。
+
+**需要线程安全时的替代方案**：
+
+- Map：ConcurrentHashMap 或 Collections.synchronizedMap()。
+- List：Vector 或 Collections.synchronizedList()。
+- 字符串拼接：StringBuffer（多线程）、StringBuilder（单线程）。
+
+**易错点**：把“线程安全”等同于“并发性能好”。Vector、Hashtable、StringBuffer 是全局锁，竞争激烈时性能较差；现代并发场景优先使用 java.util.concurrent 下的并发集合（如 ConcurrentHashMap、CopyOnWriteArrayList）。

@@ -127,3 +127,16 @@ String s2 = new String("xyz");  // 1 个对象（仅堆上新建）
 - 局部变量表存放的是对象引用，而非对象本身（对象在堆中）。
 - 方法区是 JVM 规范中的逻辑概念，JDK 8 后 Metaspace 是其具体实现，使用本地内存。
 - 程序计数器是唯一规范未定义 OOM 的区域。
+
+## JVM 内存映像与常用诊断工具
+
+**结论**：生成 JVM 内存映像（堆转储，heap dump）用 jmap。其他 JDK 工具各有分工，不生成完整内存映像。
+
+**常用工具与用途**：
+
+- jmap：生成堆转储、查看堆内存与对象统计。生成转储：`jmap -dump:format=b,file=heap.hprof <pid>`；查看对象统计：`jmap -histo:live <pid>`。
+- jstat：监控 GC 次数、堆内存使用率等运行时统计，只提供动态数据。
+- jinfo：查看或修改 JVM 运行时参数，如系统属性、启动参数。
+- jhat：分析已生成的堆转储文件并通过 HTTP 展示结果，本身不生成内存映像；较新 JDK 中已移除，可用 MAT 等替代。
+
+**易错点**：混淆“生成转储”和“分析转储”。jmap 负责生成，jhat 负责分析。另需注意，生成堆转储不只 jmap 一种方式，HotSpot 还支持 `-XX:+HeapDumpOnOutOfMemoryError` 在 OOM 时自动转储，以及 jcmd 的 GC.heap_dump。
