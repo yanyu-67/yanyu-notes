@@ -130,3 +130,21 @@ test("rejects invalid ages", () => {
 - 把 TDD 当成测试阶段的活动：它是开发方法，测试先行服务于设计与需求澄清。
 
 **适用范围**：适合需求可被拆成可验证行为的场景；需求极不明确或探索性原型阶段需谨慎使用。
+
+## BDD 与 Cucumber
+
+**结论**
+
+Cucumber 是支持 BDD 的测试框架，可以用自然语言编写测试场景，并自动生成对应的 Step Definition 代码骨架。JUnit、Mockito、JMeter 都不属于 BDD 工具。
+
+**原因**
+
+BDD（行为驱动开发）强调用业务可读的语言描述系统行为，并把这些描述与自动化测试代码关联。Cucumber 使用 Gherkin 语法编写 Feature 文件，用 Given/When/Then 描述场景，并据此生成 Step Definition 骨架。Gherkin 支持多种自然语言，包括中文。
+
+**易错点**
+
+- JUnit 是 Java 单元测试框架，用代码编写测试，不支持自然语言场景描述。
+- Mockito 是 Mock 框架，用于模拟依赖对象，不负责 BDD 场景描述。
+- JMeter 是性能测试工具，与 BDD 自然语言场景无关。
+- Cucumber 本身不直接执行自然语言，它通过 Step Definition 把 Gherkin 步骤映射到实际测试代码。
+- 同类 BDD 工具还有 SpecFlow（.NET）、Behave（Python）、Gauge 等。

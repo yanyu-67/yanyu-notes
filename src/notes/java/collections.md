@@ -111,3 +111,27 @@ public class ListCapacity {
 - 字符串拼接：StringBuffer（多线程）、StringBuilder（单线程）。
 
 **易错点**：把“线程安全”等同于“并发性能好”。Vector、Hashtable、StringBuffer 是全局锁，竞争激烈时性能较差；现代并发场景优先使用 java.util.concurrent 下的并发集合（如 ConcurrentHashMap、CopyOnWriteArrayList）。
+
+## Java 泛型的不可协变性与通配符赋值规则
+
+**结论**
+
+Java 泛型不是协变的。即使 `B extends A`，`List<B>` 也不能赋给 `List<A>`。`List<?>` 可接收任意 `List<T>`；`? extends` 支持协变，因此 `List<? extends B>` 可赋给 `List<? extends A>`。
+
+**原因**
+
+泛型不可协变是为了保证类型安全。若 `List<B>` 能赋给 `List<A>`，就能通过 `List<A>` 引用向其中加入 `C` 对象，破坏原本只应存放 `B` 的列表。
+
+常用赋值规则：
+
+- 原始类型 `List` 可接收任意 `List<T>`，编译时有 unchecked 警告。
+- `List<?>` 可指向任何 `List<T>`，包括 `List<Object>`。
+- `? extends` 上界通配符支持协变：`List<? extends B>` 可赋给 `List<? extends A>`。
+- `List<? extends A>` 不能赋给 `List<A>`，因为前者可能实际是 `List<B>`，赋给 `List<A>` 后就能加入 `C`，不安全。
+- `List<Object>` 不能赋给任意具体 `List<T>`，例如不能赋给 `List<String>`。
+
+**易错点**
+
+- `List<B>` 与 `List<A>` 之间没有赋值关系，即使 `B extends A`。
+- 通过 `List<?>` 读取只能得到 `Object`，且不能安全加入除 `null` 外的元素。
+- `? extends` 支持协变读取，但不支持写入；`? super` 支持写入，但读取只能得到 `Object`。

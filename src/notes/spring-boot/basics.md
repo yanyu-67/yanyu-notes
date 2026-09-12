@@ -64,3 +64,23 @@ public class LoggingAspect {
     }
 }
 ```
+
+## Spring AOP 通知类型与执行时机
+
+**结论**
+
+Spring AOP 中不同通知注解的执行时机不同：`@Before` 在目标方法前执行；`@Around` 可控制目标方法是否执行；`@AfterReturning` 只在正常返回时执行；`@After` 无论正常返回还是异常都会执行；`@AfterThrowing` 只在抛出异常时执行。
+
+**原因**
+
+- `@Before`：目标方法执行前运行。
+- `@Around`：通过 `ProceedingJoinPoint.proceed()` 决定是否调用目标方法，可以修改参数、返回值，是控制力最强的通知类型。
+- `@AfterReturning`：目标方法正常返回后执行，抛出异常时不执行 [citation:5][citation:8]。
+- `@AfterThrowing`：目标方法抛出异常后执行，与 `@AfterReturning` 互斥。
+- `@After`：类似 `finally` 块，无论正常返回还是异常都会执行。
+
+**易错点**
+
+- `@AfterReturning` 与 `@After` 不同：前者只在正常返回时执行，后者总会执行。
+- `@Around` 必须显式调用 `proceed()`，否则目标方法不会被执行。
+- 若使用 `@Around` 且不调用 `proceed()`，其他通知（如 `@Before`、`@After`）可能也不会按预期触发，因为目标方法未被实际调用。
