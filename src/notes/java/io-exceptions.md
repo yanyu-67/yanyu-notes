@@ -196,3 +196,50 @@ socket.close();                                 // 关闭
 - 以上都不抛 EOFException。EOFException 主要出现在 DataInputStream 等按数据类型读取、但数据提前结束的场景。
 
 **易错点**：认为 File 类能读写文件；认为后缀名决定文本或二进制；认为读到末尾必然抛 EOFException。
+
+## transient 与序列化
+
+**结论**
+
+`transient` 用于修饰成员变量，表示该变量不参与默认的 Java 序列化过程。它与 `Serializable` 接口直接相关：类只有实现 `Serializable` 后，`transient` 才有序列化层面的意义。
+
+**原因与行为**
+
+- 对象序列化时，被 `transient` 修饰的成员变量会被忽略，不写入序列化数据。
+- 反序列化时，`transient` 变量不会被恢复为原值，而是取该类型的默认值：对象类型为 `null`，`int` 为 `0`，`boolean` 为 `false` 等。
+- `transient` 只影响序列化，不影响变量在普通运行期中的读写。
+
+**常见用途**
+
+- 密码、密钥等敏感信息不写入序列化数据。
+- 可由其他字段计算得出的缓存或临时变量。
+- 不需要持久化的临时状态。
+
+**易错点**
+
+- `transient` 只能修饰成员变量，不能修饰方法、类或局部变量。
+- `static` 变量属于类而非对象，默认序列化本身不保存静态变量；再标 `transient` 没有额外意义。
+- 若类自定义了 `writeObject` / `readObject`，是否忽略 `transient` 取决于自定义实现，不必然遵循默认规则。
+- `Cloneable`、`Runnable`、`Comparable` 与 `transient` 没有直接关系。
+
+## Java 常用 IO 类与方法辨析
+
+**结论**
+
+`BufferedReader.read()` 读取单个字符，读取一行字符串应使用 `readLine()`；`System.out` 是 `PrintStream` 类型的对象，`print()`、`println()` 由 `PrintStream` 定义，不是 `PrintWriter`。
+
+**关键说明**
+
+- `BufferedReader.read()`：读取单个字符，返回 `int`，读到末尾返回 `-1`。
+- `BufferedReader.readLine()`：读取一行文本，返回 `String`（不含行尾换行符），读到末尾返回 `null`。
+- `FileInputStream`：字节输入流，用于从文件读取数据，可用 `new FileInputStream(...)` 创建。
+- `File.mkdir()`：创建单级目录；父目录不存在时创建失败。
+- `File.mkdirs()`：创建多级目录；父目录不存在时自动创建。
+- `System.out`：标准输出流，类型是 `PrintStream`，不是 `PrintWriter`。
+- `PrintStream.print()` / `println()`：由 `PrintStream` 定义，`System.out` 是其对象引用。
+
+**易错点**
+
+- 把 `read()` 当作读取字符串的方法；它返回的是 `int`，需要强转或按字符处理。
+- 把 `System.out` 的类型误记为 `PrintWriter`；`PrintWriter` 是另一个用于字符输出的类。
+- 把 `mkdir()` 与 `mkdirs()` 混用；单级目录用 `mkdir()`，多级目录用 `mkdirs()` 更稳妥。

@@ -135,3 +135,68 @@ Java 泛型不是协变的。即使 `B extends A`，`List<B>` 也不能赋给 `L
 - `List<B>` 与 `List<A>` 之间没有赋值关系，即使 `B extends A`。
 - 通过 `List<?>` 读取只能得到 `Object`，且不能安全加入除 `null` 外的元素。
 - `? extends` 支持协变读取，但不支持写入；`? super` 支持写入，但读取只能得到 `Object`。
+
+## Java 常见队列实现对比
+
+**结论**
+
+Java 中不同 `Queue` 实现在线程安全性、是否有界、是否允许 `null`、出队顺序上差异明显，不能只按“队列就是 FIFO”理解。
+
+**核心对比**
+
+| 队列 | 线程安全 | 是否有界 | 是否允许 null | 出队顺序 |
+|---|---|---|---|---|
+| `PriorityQueue` | 否 | 无界 | 否 | 优先级 |
+| `LinkedBlockingQueue` | 是 | 可选有界 | 否 | FIFO |
+| `ConcurrentLinkedQueue` | 是 | 无界 | 否 | FIFO |
+
+**关键说明**
+
+- `PriorityQueue` 基于二叉堆，默认最小堆，出队的是优先级最高（默认最小值）的元素，不遵循 FIFO。
+- `PriorityQueue` 的入队 `offer`/`add` 与出队 `poll`/`remove` 需要维护堆性质，时间复杂度为 `O(log n)`；`peek` 为 `O(1)`。
+- `PriorityQueue` 不允许 `null`，插入 `null` 会抛出 `NullPointerException`。
+- `LinkedBlockingQueue` 是阻塞队列，内部通过锁保证线程安全。
+- `LinkedBlockingQueue` 构造时不指定容量，默认容量为 `Integer.MAX_VALUE`，实践中可视为无界；指定容量后即为有界。
+- `LinkedBlockingQueue` 不允许 `null`，插入 `null` 会抛出 `NullPointerException`。
+- `ConcurrentLinkedQueue` 是线程安全的无界并发队列，遵循 FIFO，不允许 `null`。
+
+**易错点**
+
+- “无界”不等于绝对不会失败。`PriorityQueue` 和默认容量的 `LinkedBlockingQueue` 只是不预设固定容量上限，仍可能因内存不足等原因失败。
+- `PriorityQueue` 非线程安全；多线程环境下不能直接并发使用。
+- `LinkedBlockingQueue` 是线程安全的；不要与 `PriorityQueue` 一并归为“线程不安全”。
+
+## Java 常见集合实现类对比
+
+**结论**
+
+Java 集合实现类的差异主要体现在底层数据结构、顺序性和线程安全性上。选择集合时应按这三项判断，而不是只记类名。
+
+**核心对比**
+
+| 集合 | 底层结构 | 顺序性 | 线程安全 |
+|---|---|---|---|
+| `ArrayList` | 数组 | 按索引 | 否 |
+| `LinkedList` | 双向链表 | 按插入 | 否 |
+| `HashSet` | 哈希表 | 不保证 | 否 |
+| `LinkedHashSet` | 哈希表 + 双向链表 | 插入顺序 | 否 |
+| `TreeMap` | 红黑树 | 按键排序 | 否 |
+| `HashMap` | 哈希表 | 不保证 | 否 |
+| `Vector` | 数组 | 按索引 | 是 |
+| `Hashtable` | 哈希表 | 不保证 | 是 |
+
+**关键说明**
+
+- `ArrayList` 基于数组，支持随机访问，容量不足时自动扩容。
+- `LinkedList` 基于双向链表，节点持有前驱和后继引用，按索引访问需要遍历。
+- `HashSet` 基于哈希表，不保证迭代顺序；`LinkedHashSet` 额外用双向链表维护插入顺序。
+- `TreeMap` 基于红黑树，按键的自然顺序或指定 `Comparator` 排序。
+- `HashMap` 基于哈希表，不保证键值对顺序。
+- `Vector` 是线程安全的动态数组，方法使用 `synchronized` 同步。
+- `Hashtable` 是线程安全的映射，方法使用 `synchronized` 同步，不是线程不安全的。
+
+**易错点**
+
+- `LinkedHashSet` 的“有序”指迭代顺序可预测，默认是插入顺序，不是按元素大小排序；按大小排序要用 `TreeSet`。
+- `Vector`、`Hashtable` 虽线程安全，但并发场景下更常用 `ConcurrentHashMap`、`CopyOnWriteArrayList` 等替代。
+- `HashMap` 与 `Hashtable` 都不保证顺序，区别之一是 `Hashtable` 线程安全且不允许 `null` 键值，而 `HashMap` 允许一个 `null` 键和多个 `null` 值。
